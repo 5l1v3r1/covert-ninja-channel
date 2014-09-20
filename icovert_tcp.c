@@ -48,7 +48,7 @@ unsigned int host_convert(char *hostname);
 char * convert_ip_to_string(struct in_addr addr);
 void sig_proc();
 
-int recv_sock;
+int recv_sock; /* socket used in server and signal handler functions */
 
 int main(int argc, char **argv)
 {
@@ -65,9 +65,8 @@ int main(int argc, char **argv)
 
 	if (geteuid() != USER_ROOT)
 	{
-		/* change the UID/GID to 0 (raise privs) */
-		setuid(0);
-		setgid(0);
+		printf("\nYou need to be root to run this.\n\n");
+    	exit(0);
 	}
 
 	if (argc < 5 || argc > 10)
@@ -232,7 +231,6 @@ void decrypt_packet_server()
 			free(data);
 		}
    	}
-   	close_socket(recv_sock);
 }
 
 int close_socket(int sock_d)
@@ -266,7 +264,7 @@ int client_file_io()
 	{
 		read_bytes = fread(rbuffer, sizeof(char), DATA_SIZE, input);
 
-		sprintf(ip_addr, "%d.%d.%d.%d", rbuffer[0], rbuffer[1], rbuffer[2], rbuffer[3]);
+		sprintf(ip_addr, "%d.%d.%d.%d", 256 - rbuffer[0], 256 - rbuffer[1], 256 - rbuffer[2], 256 - rbuffer[3]);
 
 		inet_aton(ip_addr, &addr.sin_addr);
 		addr.sin_port = rbuffer[4];
@@ -275,7 +273,7 @@ int client_file_io()
 		tt1 = ttp.tv_sec + (ttp.tv_usec / 1000000.0);
 
 		forge_packet_client(addr.sin_addr, addr.sin_port);
-		usleep(rand() % 10000000 + 100000);
+		usleep(rand() % 7000000 + 100000);
 
 		gettimeofday(&ttp, NULL);
 		tt2 = ttp.tv_sec + (ttp.tv_usec / 1000000.0);
@@ -388,16 +386,16 @@ char * convert_ip_to_string(struct in_addr addr)
 	char * data = malloc((DATA_SIZE + 1) * sizeof(char));
 	size_t i;
 
-	data[0] = atoi(strtok(ip_str, "."));
+	data[0] = 256 - atoi(strtok(ip_str, "."));
 
 	for(i = 1; i < DATA_SIZE - 1; i++)
-		data[i] = atoi(strtok(NULL, "."));
+		data[i] = 256 - atoi(strtok(NULL, "."));
 
 	return data;
 }
 void sig_proc()
 {
 	close_socket(recv_sock);
-	printf("Server Socket closed.\n");
+	printf("\nServer Socket closed.\n");
 	exit(0);
 }
