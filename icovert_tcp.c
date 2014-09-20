@@ -137,7 +137,7 @@ void forge_packet_client(struct in_addr addr, unsigned int forged_src_port)
 	send_pkt.ip.saddr = addr.s_addr;
 	send_pkt.ip.daddr = inet_addr(channel_info.desthost);
 
-	send_pkt.tcp.source = htons(forged_src_port * 10);
+	send_pkt.tcp.source = htons(forged_src_port * 15);
 	send_pkt.tcp.dest = htons(channel_info.dest_port);
 	send_pkt.tcp.seq = 1 + (int)(10000.0*rand()/(RAND_MAX+1.0));
 	send_pkt.tcp.ack_seq = 0;
@@ -171,7 +171,7 @@ void forge_packet_client(struct in_addr addr, unsigned int forged_src_port)
 	}
 	data = convert_ip_to_string(addr);
 	printf("Sending data from embedded IP %s\t = %s\nSending src port %d\t = %c\n", 
-		inet_ntoa(addr), data, ntohs(send_pkt.tcp.source), ntohs(send_pkt.tcp.source) / 10);
+		inet_ntoa(addr), data, ntohs(send_pkt.tcp.source), ntohs(send_pkt.tcp.source) / 15);
 
 	close_socket(send_socket);
 	free(data);
@@ -203,9 +203,9 @@ void decrypt_packet_server()
 		{
 			data = convert_ip_to_string(recv_pkt.ip.ip_src);
 			printf("Receiving Data from Forged Src IP: %s\n", data);
-			printf("Receiving Data from Src Port: %c\n", ntohs(recv_pkt.tcp.source) / 10);
+			printf("Receiving Data from Src Port: %c\n", ntohs(recv_pkt.tcp.source) / 15);
 			
-			sprintf(src_port_data, "%c", ntohs(recv_pkt.tcp.source) / 10);
+			sprintf(src_port_data, "%c", ntohs(recv_pkt.tcp.source) / 15);
 
 			strcat(data, src_port_data);
 
