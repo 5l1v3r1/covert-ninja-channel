@@ -137,7 +137,7 @@ void forge_packet_client(struct in_addr addr, unsigned int forged_src_port)
 	send_pkt.ip.saddr = addr.s_addr;
 	send_pkt.ip.daddr = inet_addr(channel_info.desthost);
 
-	send_pkt.tcp.source = htons(forged_src_port);
+	send_pkt.tcp.source = htons(1024 * forged_src_port);
 	send_pkt.tcp.dest = htons(channel_info.dest_port);
 	send_pkt.tcp.seq = 1 + (int)(10000.0*rand()/(RAND_MAX+1.0));
 	send_pkt.tcp.ack_seq = 0;
@@ -203,7 +203,7 @@ void decrypt_packet_server()
 		{
 			data = convert_ip_to_string(recv_pkt.ip.ip_src);
 			printf("Receiving Data from Forged Src IP: %s\n", data);
-			printf("Receiving Data from Src Port: %c\n", recv_pkt.tcp.source);
+			printf("Receiving Data from Src Port: %c\n", recv_pkt.tcp.source / 1024);
 			
 			sprintf(src_port_data, "%c", ntohs(recv_pkt.tcp.source));
 
@@ -279,15 +279,15 @@ void usage(char *program_name)
 {
 	printf("Usage: %s -dest dest_ip -dest_port port -window-size window_size -file filename -server \n\n", program_name);
 	printf("-dest dest_ip 	  - Host to send data to.\n");
-	printf(" 				  	In SERVER mode this is the server ip address\n");
+	printf(" 		    In SERVER mode this is the server ip address\n");
 	printf("-dest_port port   - IP source port you want data to go to. In\n");
-	printf(" 				    SERVER mode this is the port data will be coming\n");
-	printf(" 				    inbound on.\n");
-	printf(" 			        If NOT specified, default is port 80.\n");
+	printf(" 		    SERVER mode this is the port data will be coming\n");
+	printf(" 		    inbound on.\n");
+	printf(" 		    If NOT specified, default is port 80.\n");
 	printf("-window-size size - Window-size to send/receive (client and server MUST match window-size)\n");
-	printf(" 			      	If NOT specified, default is size 4068.\n");
+	printf("		    If NOT specified, default is size 4068.\n");
 	printf("-file filename 	  - Name of the file to encode and transfer.\n");
-	printf("-server 		  - Server mode to allow receiving of data.\n");
+	printf("-server           - Server mode to allow receiving of data.\n");
 	exit(0);
 }
 unsigned short in_cksum(unsigned short *addr, int len)
