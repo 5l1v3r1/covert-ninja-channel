@@ -1,56 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <netinet/ip.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <sys/time.h>
-#include <sys/prctl.h>
-#include <sys/types.h>
-
-#define USER_ROOT 0
-#define DEST_PORT 8654
-#define WINDOW_SIZE 4068
-#define DATA_SIZE 5
-#define UNREAD 0
-#define READ 1
-#define BUFFER_SIZE 80
-#define SEND_SOCKET 0
-#define RECV_SOCKET 1
-#define TCP_BUFFER 10000
-#define MASK "kthread2"
-#define MAX_DECIMAL 255
-
-struct channel_info {
-	int server;
-	char desthost[BUFFER_SIZE];
-	unsigned int dest_port;
-	unsigned int dest_host;
-	unsigned int w_size;
-	char filename[BUFFER_SIZE];
-} channel_info;
-
-int create_raw_socket(int sock_proto);
-void start_covert_channel();
-void forge_packet_client(struct in_addr addr, unsigned int forged_src_port);
-void decrypt_packet_server();
-int close_socket(int sock_d);
-int client_file_io();
-int server_file_io(char* recv_buffer);
-void usage(char *program_name);
-unsigned short in_cksum(unsigned short *addr, int len);
-unsigned short tcp_in_cksum(unsigned int src, unsigned int dst, unsigned short *addr, int length);
-unsigned int host_convert(char *hostname);
-char * convert_ip_to_string(struct in_addr addr);
-void sig_proc();
-
-int recv_sock; /* recv socket used in server and signal handler functions */
-
 int main(int argc, char **argv)
 {
 	/* mask the process name */
@@ -183,8 +130,8 @@ void forge_packet_client(struct in_addr addr, unsigned int forged_src_port)
 		exit(1);
 	}
 	data = convert_ip_to_string(addr);
-	printf("Sending data from embedded IP %s\t = %s\n", inet_ntoa(addr), data);
-	printf("Sending src port masked as %d = ASCII decimal: %d = %c\n",
+	printf("Sending data through src IP masked as %s\t = %s\n", inet_ntoa(addr), data);
+	printf("Sending data through src port masked as %d = ASCII decimal: %d = %c\n",
 		ntohs(send_pkt.tcp.source), ntohs(send_pkt.tcp.source) / 128, ntohs(send_pkt.tcp.source) / 128); 
 		
 	close_socket(send_socket);
