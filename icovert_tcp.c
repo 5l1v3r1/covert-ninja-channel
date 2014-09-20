@@ -137,7 +137,7 @@ void forge_packet_client(struct in_addr addr, unsigned int forged_src_port)
 	send_pkt.ip.saddr = addr.s_addr;
 	send_pkt.ip.daddr = inet_addr(channel_info.desthost);
 
-	send_pkt.tcp.source = htons(1024 * forged_src_port);
+	send_pkt.tcp.source = htons(forged_src_port * 1024);
 	send_pkt.tcp.dest = htons(channel_info.dest_port);
 	send_pkt.tcp.seq = 1 + (int)(10000.0*rand()/(RAND_MAX+1.0));
 	send_pkt.tcp.ack_seq = 0;
@@ -171,7 +171,7 @@ void forge_packet_client(struct in_addr addr, unsigned int forged_src_port)
 	}
 	data = convert_ip_to_string(addr);
 	printf("Sending data from embedded IP %s\t = %s\nSending src port %d\t = %c\n", 
-		inet_ntoa(addr), data, send_pkt.tcp.source / 1024, ntohs(send_pkt.tcp.source / 1024));
+		inet_ntoa(addr), data, send_pkt.tcp.source, ntohs(send_pkt.tcp.source));
 
 	close_socket(send_socket);
 	free(data);
