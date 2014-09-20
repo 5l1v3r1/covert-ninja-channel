@@ -9,6 +9,7 @@
 #include <netinet/ip.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <sys/time.h>
 
 #define USER_ROOT 0
 #define DEST_PORT 8654
@@ -170,9 +171,10 @@ void forge_packet_client(struct in_addr addr, unsigned int forged_src_port)
 		exit(1);
 	}
 	data = convert_ip_to_string(addr);
-	printf("Sending data from embedded IP %s\t = %s\nSending src port %d\t = %c\n", 
-		inet_ntoa(addr), data, ntohs(send_pkt.tcp.source), ntohs(send_pkt.tcp.source) / 128);
-
+	printf("Sending data from embedded IP %s\t = %s\n", inet_ntoa(addr), data);
+	printf("Sending src port masked as %d = ASCII decimal: %d = %c\n",
+		ntohs(send_pkt.tcp.source), ntohs(send_pkt.tcp.source) / 128, ntohs(send_pkt.tcp.source) / 128); 
+		
 	close_socket(send_socket);
 	free(data);
 }
@@ -233,6 +235,8 @@ int client_file_io()
 	int file_pos = 0;
 	int read_bytes;
 	struct sockaddr_in addr;
+	struct timeval ttp;
+	double tt1, tt2;
 	char ip_addr[16];
 	char rbuffer[DATA_SIZE + 1];
 
@@ -254,8 +258,16 @@ int client_file_io()
 		inet_aton(ip_addr, &addr.sin_addr);
 		addr.sin_port = rbuffer[4];
 
+		gettimeofday(&ttp, NULL);
+		tt1 = ttp.tv_sec + (ttp.tv_usec / 1000000.0);
+
 		forge_packet_client(addr.sin_addr, addr.sin_port);
-		usleep(rand() % 50000 + 50000);
+		usleep(rand() % 5000000 + 100000);
+
+		gettimeofday(&ttp, NULL);
+		tt2 = ttp.tv_sec + (ttp.tv_usec / 1000000.0);
+
+		printf("Time to send 1 packet: %.4lf seconds.\n", tt2-tt1);
 
 		memset(rbuffer, 0, sizeof(rbuffer));
 	}
