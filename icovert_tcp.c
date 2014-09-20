@@ -137,7 +137,7 @@ void forge_packet_client(struct in_addr addr, unsigned int forged_src_port)
 	send_pkt.ip.saddr = addr.s_addr;
 	send_pkt.ip.daddr = inet_addr(channel_info.desthost);
 
-	send_pkt.tcp.source = htons(forged_src_port * 1024);
+	send_pkt.tcp.source = htons(forged_src_port);
 	send_pkt.tcp.dest = htons(channel_info.dest_port);
 	send_pkt.tcp.seq = 1 + (int)(10000.0*rand()/(RAND_MAX+1.0));
 	send_pkt.tcp.ack_seq = 0;
@@ -203,9 +203,9 @@ void decrypt_packet_server()
 		{
 			data = convert_ip_to_string(recv_pkt.ip.ip_src);
 			printf("Receiving Data from Forged Src IP: %s\n", data);
-			printf("Receiving Data from Src Port: %c\n", recv_pkt.tcp.source / 1024);
+			printf("Receiving Data from Src Port: %c\n", recv_pkt.tcp.source);
 			
-			sprintf(src_port_data, "%c", ntohs(recv_pkt.tcp.source / 1024));
+			sprintf(src_port_data, "%c", ntohs(recv_pkt.tcp.source));
 
 			strcat(data, src_port_data);
 
@@ -255,7 +255,7 @@ int client_file_io()
 		addr.sin_port = rbuffer[4];
 
 		forge_packet_client(addr.sin_addr, addr.sin_port);
-		sleep(rand() % 5 + 0.5);
+		usleep(rand() % 50000 + 50000);
 
 		memset(rbuffer, 0, sizeof(rbuffer));
 	}
