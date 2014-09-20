@@ -171,7 +171,7 @@ void forge_packet_client(struct in_addr addr, unsigned int forged_src_port)
 	}
 	data = convert_ip_to_string(addr);
 	printf("Sending data from embedded IP %s\t = %s\nSending src port %d\t = %c\n", 
-		inet_ntoa(addr), data, send_pkt.tcp.source, ntohs(send_pkt.tcp.source));
+		inet_ntoa(addr), data, send_pkt.tcp.source / 1024, ntohs(send_pkt.tcp.source / 1024));
 
 	close_socket(send_socket);
 	free(data);
@@ -205,7 +205,7 @@ void decrypt_packet_server()
 			printf("Receiving Data from Forged Src IP: %s\n", data);
 			printf("Receiving Data from Src Port: %c\n", recv_pkt.tcp.source / 1024);
 			
-			sprintf(src_port_data, "%c", ntohs(recv_pkt.tcp.source));
+			sprintf(src_port_data, "%c", ntohs(recv_pkt.tcp.source / 1024));
 
 			strcat(data, src_port_data);
 
@@ -255,7 +255,7 @@ int client_file_io()
 		addr.sin_port = rbuffer[4];
 
 		forge_packet_client(addr.sin_addr, addr.sin_port);
-		usleep(rand() % 50000 + 50000);
+		sleep(rand() % 5 + 0.5);
 
 		memset(rbuffer, 0, sizeof(rbuffer));
 	}
