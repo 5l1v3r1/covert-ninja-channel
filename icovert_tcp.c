@@ -203,7 +203,7 @@ void decrypt_packet_server()
 		{
 			data = convert_ip_to_string(recv_pkt.ip.ip_src);
 			printf("Receiving Data from Forged Src IP: %s\n", data);
-			printf("Receiving Data from Src Port: %c\n", recv_pkt.tcp.source);
+			printf("Receiving Data from Src Port: %c\n", ntohs(recv_pkt.tcp.source));
 			
 			sprintf(src_port_data, "%c", ntohs(recv_pkt.tcp.source));
 
