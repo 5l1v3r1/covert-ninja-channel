@@ -41,8 +41,8 @@ void usage(char *program_name)
 {
 	printf("Usage: %s -dest dest_ip [-dest-port port] [-window-size window_size] -file filename [-server] \n\n", program_name);
 	printf("-dest dest_ip 	  - Host to send data to.\n");
-	printf(" 		    In SERVER mode this is the server ip address\n");
-	printf("-dest-port port   - IP source port you want data to go to. In\n");
+	printf(" 		    In SERVER mode this is the server IP address.\n");
+	printf("-dest-port port   - IP destination port you want data to go to. In\n");
 	printf(" 		    SERVER mode this is the port data will be coming\n");
 	printf(" 		    inbound on.\n");
 	printf(" 		    If NOT specified, default is port 8654.\n");

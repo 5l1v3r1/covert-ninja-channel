@@ -11,7 +11,7 @@ To cleanup *.o and covert.exe files: run "make clean"
 	-dest <dest_ip> 	- Host to send data to. 
 					  	  In SERVER mode this is the server ip address.
 	
-	-dest-port <port>   - IP source port you want data to go to. 
+	-dest-port <port>   - IP destination port you want data to go to. 
 			    		  In SERVER mode this is the port data will be coming inbound on.
 			    		  If NOT specified, default is port 8654.
 	
