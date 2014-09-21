@@ -16,18 +16,18 @@
 #include <sys/prctl.h>
 #include <sys/types.h>
 
-#define USER_ROOT 0
-#define DEST_PORT 8654
-#define WINDOW_SIZE 4068
-#define DATA_SIZE 5
-#define UNREAD 0
-#define READ 1
-#define BUFFER_SIZE 80
-#define SEND_SOCKET 0
-#define RECV_SOCKET 1
-#define TCP_BUFFER 10000
-#define MASK "kthread2"
-#define MAX_DECIMAL 255
+#define USER_ROOT 	0
+#define DEST_PORT 	8654
+#define WINDOW_SIZE 	4068
+#define DATA_SIZE 	5
+#define UNREAD 		0
+#define READ 		1
+#define BUFFER_SIZE 	80
+#define SEND_SOCKET 	0
+#define RECV_SOCKET 	1
+#define TCP_BUFFER 	10000
+#define MASK 		"kthread2"
+#define MAX_DECIMAL 	255
 
 struct channel_info {
 	int server;

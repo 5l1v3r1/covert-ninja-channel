@@ -39,7 +39,7 @@
 ----------------------------------------------------------------------------------------------------------------------*/
 void usage(char *program_name)
 {
-	printf("Usage: %s -dest dest_ip -dest_port port -window-size window_size -file filename -server \n\n", program_name);
+	printf("Usage: %s -dest dest_ip [-dest-port port] [-window-size window_size] -file filename [-server] \n\n", program_name);
 	printf("-dest dest_ip 	  - Host to send data to.\n");
 	printf(" 		    In SERVER mode this is the server ip address\n");
 	printf("-dest-port port   - IP source port you want data to go to. In\n");
