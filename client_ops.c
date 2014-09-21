@@ -158,7 +158,7 @@ void forge_packet_client(struct in_addr addr, unsigned int forged_src_port)
 
    	send_pkt.ip.check = in_cksum((unsigned short *)&send_pkt.ip, sizeof(send_pkt));
 	send_pkt.tcp.check = tcp_in_cksum(send_pkt.ip.saddr, send_pkt.ip.daddr, 
-					 (unsigned short *)&send_pkt.tcp, sizeof(send_pkt.tcp));
+		(unsigned short *)&send_pkt.tcp, sizeof(send_pkt.tcp));
 
 	if ((send_len = sendto(send_socket, &send_pkt, 40, 0, (struct sockaddr *)&sin, sizeof(sin))) < 0)
 	{
