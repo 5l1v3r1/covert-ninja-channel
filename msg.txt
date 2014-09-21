@@ -1,0 +1,1 @@
+If you are reading this, I'm sending it under a TCP covert channel with data embedded in the source IP and the source port. If you can read this message properly without any fragments, you should be fine.
