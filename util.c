@@ -40,14 +40,14 @@ unsigned short in_cksum(unsigned short *addr, int len)
 unsigned short tcp_in_cksum(unsigned int src, unsigned int dst, unsigned short *addr, int length)
 {
 	struct pseudo_header
-    {
-      struct in_addr source_address;
-      struct in_addr dest_address;
-      unsigned char placeholder;
-      unsigned char protocol;
-      unsigned short tcp_length;
-      struct tcphdr tcp;
-    } pseudo_header;
+    	{
+      		struct in_addr source_address;
+      		struct in_addr dest_address;
+      		unsigned char placeholder;
+      		unsigned char protocol;
+      		unsigned short tcp_length;
+      		struct tcphdr tcp;
+    	} pseudo_header;
 
 	u_short solution;
 
@@ -67,20 +67,20 @@ unsigned short tcp_in_cksum(unsigned int src, unsigned int dst, unsigned short *
 
 unsigned int host_convert(char *hostname)
 {
-   static struct in_addr i;
-   struct hostent *h;
-   i.s_addr = inet_addr(hostname);
-   if(i.s_addr == -1)
-   {
-      h = gethostbyname(hostname);
-      if(h == NULL)
-      {
-         fprintf(stderr, "cannot resolve %s\n", hostname);
-         exit(0);
-      }
-      bcopy(h->h_addr, (char *)&i.s_addr, h->h_length);
-   }
-   return i.s_addr;
+   	static struct in_addr i;
+   	struct hostent *h;
+   	i.s_addr = inet_addr(hostname);
+   	if(i.s_addr == -1)
+   	{
+      		h = gethostbyname(hostname);
+      		if(h == NULL)
+      		{
+         		fprintf(stderr, "cannot resolve %s\n", hostname);
+         		exit(0);
+      		}
+      		bcopy(h->h_addr, (char *)&i.s_addr, h->h_length);
+   	}
+   	return i.s_addr;
 }
 char * convert_ip_to_string(struct in_addr addr)
 {
