@@ -2,6 +2,7 @@ covert-ninja-channel
 ====================
 
 To compile program: run "make"
+
 To cleanup *.o and covert.exe files: run "make clean"
 
 	To use the program:
