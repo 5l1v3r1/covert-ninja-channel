@@ -1,42 +1,127 @@
 #include "util.h"
 
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: util.c - This source file holds utility functions, which are used by the client and/or server.
+-- 
+-- FUNCTIONS: 	void usage(char *program_name);
+--		unsigned short in_cksum(unsigned short *ptr, int nbytes);
+--		unsigned short tcp_in_cksum(unsigned int src, unsigned int dst, unsigned short *addr, int length);
+--		unsigned int host_convert(char *hostname);
+--		char * convert_ip_to_string(struct in_addr addr);
+-- 
+-- DATE: 2014/09/20
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao
+-- 
+-- PROGRAMMER: Luke Tao
+-- 
+-- NOTES: Used by the client and/or server, these functions are utilized by other functions.
+----------------------------------------------------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: usage
+-- 
+-- DATE: 2014/09/20
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao
+-- 
+-- PROGRAMMER: Luke Tao
+-- 
+-- INTERFACE: void usage(char *program_name)
+-- 
+-- RETURNS: void.
+-- 
+-- NOTES: Prints how to use the covert channel program.
+----------------------------------------------------------------------------------------------------------------------*/
 void usage(char *program_name)
 {
 	printf("Usage: %s -dest dest_ip -dest_port port -window-size window_size -file filename -server \n\n", program_name);
 	printf("-dest dest_ip 	  - Host to send data to.\n");
 	printf(" 		    In SERVER mode this is the server ip address\n");
-	printf("-dest_port port   - IP source port you want data to go to. In\n");
+	printf("-dest-port port   - IP source port you want data to go to. In\n");
 	printf(" 		    SERVER mode this is the port data will be coming\n");
 	printf(" 		    inbound on.\n");
-	printf(" 		    If NOT specified, default is port 80.\n");
+	printf(" 		    If NOT specified, default is port 8654.\n");
 	printf("-window-size size - Window-size to send/receive (client and server MUST match window-size)\n");
 	printf("		    If NOT specified, default is size 4068.\n");
 	printf("-file filename 	  - Name of the file to encode and transfer.\n");
 	printf("-server           - Server mode to allow receiving of data.\n");
+        printf("                  - If NOT specified, client mode will run to allow sending of data.\n");
 	exit(0);
 }
-unsigned short in_cksum(unsigned short *addr, int len)
+
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: in_cksum
+-- 
+-- DATE: 2014/09/20
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Craig H. Rowland (from the TCP Covert Channel source code)
+-- 
+-- PROGRAMMER: Craig H. Rowland (from the TCP Covert Channel source code)
+-- 
+-- INTERFACE: unsigned short in_cksum(unsigned short *addr, int len)
+-- 
+-- RETURNS: The checksum for the IP header.
+-- 
+-- NOTES: Algorithm that makes the IP header checksum.
+----------------------------------------------------------------------------------------------------------------------*/
+unsigned short in_cksum(unsigned short *ptr, int nbytes)
 {
-	int nleft = len;
-	int sum = 0;
-	unsigned short *w = addr;
-	unsigned short answer = 0;
+	register long          sum;            /* assumes long == 32 bits */
+        u_short                oddbyte;
+        register u_short       answer;         /* assumes u_short == 16 bits */
 
-	while (nleft > 1) {
-		sum += *w++;
-		nleft -= 2;
-	}
+        /*
+         * Our algorithm is simple, using a 32-bit accumulator (sum),
+         * we add sequential 16-bit words to it, and at the end, fold back
+         * all the carry bits from the top 16 bits into the lower 16 bits.
+         */
 
-	if (nleft == 1) {
-		*(unsigned char *) (&answer) = *(unsigned char *) w;
-		sum += answer;
-	}
-	
-	sum = (sum >> 16) + (sum & 0xFFFF);
-	sum += (sum >> 16);
-	answer = ~sum;
-	return (answer);
+        sum = 0;
+        while (nbytes > 1)  {
+                sum += *ptr++;
+                nbytes -= 2;
+        }
+
+        /* mop up an odd byte, if necessary */
+        if (nbytes == 1) {
+                oddbyte = 0; /* make sure top half is zero */
+                *((u_char *) &oddbyte) = *(u_char *)ptr; /* one byte only */
+                sum += oddbyte;
+        }
+
+        /*
+         * Add back carry outs from top 16 bits to low 16 bits.
+         */
+        sum  = (sum >> 16) + (sum & 0xffff);    /* add high-16 to low-16 */
+        sum += (sum >> 16);                     /* add carry */
+        answer = ~sum;          /* ones-complement, then truncate to 16 bits */
+        return(answer);
 }
+
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: tcp_in_cksum
+-- 
+-- DATE: 2014/09/20
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Murat Balaban (from http://www.enderunix.org/docs/en/rawipspoof/)
+-- 
+-- PROGRAMMER: Murat Balaban (http://www.enderunix.org/docs/en/rawipspoof/)
+-- 
+-- INTERFACE: unsigned short tcp_in_cksum(unsigned int src, unsigned int dst, unsigned short *addr, int length)
+-- 
+-- RETURNS: The checksum for the TCP header. 
+-- 
+-- NOTES: Algorithm that makes the TCP header checksum.
+----------------------------------------------------------------------------------------------------------------------*/
 unsigned short tcp_in_cksum(unsigned int src, unsigned int dst, unsigned short *addr, int length)
 {
 	struct pseudo_header
@@ -65,6 +150,23 @@ unsigned short tcp_in_cksum(unsigned int src, unsigned int dst, unsigned short *
 	return (solution);
 }
 
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: host_convert
+-- 
+-- DATE: 2014/09/20
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao
+-- 
+-- PROGRAMMER: Luke Tao
+-- 
+-- INTERFACE: unsigned int host_convert(char *hostname)
+-- 
+-- RETURNS: The IP address of the given host name.
+-- 
+-- NOTES: Converts a host name to its IP address.
+----------------------------------------------------------------------------------------------------------------------*/
 unsigned int host_convert(char *hostname)
 {
    	static struct in_addr i;
@@ -82,6 +184,26 @@ unsigned int host_convert(char *hostname)
    	}
    	return i.s_addr;
 }
+
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: convert_ip_to_string
+-- 
+-- DATE: 2014/09/20
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao
+-- 
+-- PROGRAMMER: Luke Tao
+-- 
+-- INTERFACE: char * convert_ip_to_string(struct in_addr addr)
+-- 
+-- RETURNS: A pointer to the converted ASCII data.
+-- 
+-- NOTES: This function takes in an IP address, converts it into a string, splits the string by dividing with the '.',
+--	  decrypts it by subtracting 255 to each of the decimal ASCII-equivalent characters and then stores them into a
+--	  dynamically-allocated array. Afterwards, it returns a pointer to that array.
+----------------------------------------------------------------------------------------------------------------------*/
 char * convert_ip_to_string(struct in_addr addr)
 {
 	char * ip_str = inet_ntoa(addr);

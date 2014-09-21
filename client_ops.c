@@ -1,5 +1,43 @@
 #include "client_ops.h"
 
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: client_ops.c - This source file holds functions for the client.
+-- 
+-- FUNCTIONS: 	int client_file_io();
+--		void forge_packet_client(struct in_addr addr, unsigned int forged_src_port);
+-- 
+-- DATE: 2014/09/20
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao
+-- 
+-- PROGRAMMER: Luke Tao
+-- 
+-- NOTES: These 2 functions are used by the client, for client file I/O operations and packet forging. 
+----------------------------------------------------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: client_file_io
+-- 
+-- DATE: 2014/09/20
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao
+-- 
+-- PROGRAMMER: Luke Tao
+-- 
+-- INTERFACE: int client_file_io()
+-- 
+-- RETURNS: 0 on successful file reading.
+-- 
+-- NOTES: This client function essentially opens a file for reading, reads 5 bytes of data, and then send them
+--	  over the network. Note that the data is encrypted by subtracting 255 to each of the decimal ASCII-equivalent 
+--	  characters (same way as decrypting, see convert_ip_to_string function in util.c). This function also uses
+--	  timestamps where it calculates from the start of the packet forging, sending it over to the server,
+-- 	  to the end of the sleep time. The timestamps are for testing purposes.
+----------------------------------------------------------------------------------------------------------------------*/
 int client_file_io()
 {
 	FILE * input;
@@ -31,12 +69,14 @@ int client_file_io()
 		inet_aton(ip_addr, &addr.sin_addr);
 		addr.sin_port = rbuffer[4];
 
+		/* Time start */
 		gettimeofday(&ttp, NULL);
 		tt1 = ttp.tv_sec + (ttp.tv_usec / 1000000.0);
 
 		forge_packet_client(addr.sin_addr, addr.sin_port);
 		usleep(rand() % 7000000 + 100000);
 
+		/* Time finish */
 		gettimeofday(&ttp, NULL);
 		tt2 = ttp.tv_sec + (ttp.tv_usec / 1000000.0);
 
@@ -48,7 +88,27 @@ int client_file_io()
 	return 0;
 }
 
-//Function sends the packet
+/*--------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: forge_packet_client
+-- 
+-- DATE: 2014/09/20
+-- 
+-- REVISIONS: (Date and Description)
+-- 
+-- DESIGNER: Luke Tao
+-- 
+-- PROGRAMMER: Luke Tao
+-- 
+-- INTERFACE: void forge_packet_client(struct in_addr addr, unsigned int forged_src_port)
+--				       struct in_addr addr 	    - forged source IP
+--				       unsigned int forged_src_port - forged source port
+--
+-- 
+-- RETURNS: void.
+-- 
+-- NOTES: This function passes in the forged source IP and port and embeds them into the packet. Afterwards, it
+--	  performs a checksum for both the IP and TCP headers, then sends them to the server.
+----------------------------------------------------------------------------------------------------------------------*/
 void forge_packet_client(struct in_addr addr, unsigned int forged_src_port)
 {
 	struct send_pkt
@@ -98,7 +158,7 @@ void forge_packet_client(struct in_addr addr, unsigned int forged_src_port)
 
    	send_pkt.ip.check = in_cksum((unsigned short *)&send_pkt.ip, sizeof(send_pkt));
 	send_pkt.tcp.check = tcp_in_cksum(send_pkt.ip.saddr, send_pkt.ip.daddr, 
-									 (unsigned short *)&send_pkt.tcp, sizeof(send_pkt.tcp));
+					 (unsigned short *)&send_pkt.tcp, sizeof(send_pkt.tcp));
 
 	if ((send_len = sendto(send_socket, &send_pkt, 40, 0, (struct sockaddr *)&sin, sizeof(sin))) < 0)
 	{

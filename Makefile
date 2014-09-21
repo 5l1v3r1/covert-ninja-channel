@@ -25,5 +25,4 @@ socket_ops.o: socket_ops.c socket_ops.h covert.h
 	${CC} ${CFLAGS} -c socket_ops.c
 
 clean:
-
 	rm -rf *.o *.c~ *.h~ ./covert
